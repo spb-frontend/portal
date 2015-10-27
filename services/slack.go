@@ -30,9 +30,11 @@ func (sl slackService) ExposePortal() Portal {
     for {
       select {
       case msg := <-sl.rtm.IncomingEvents:
-        sending := sl.triggerMessages(msg)
-        if sending.Kind == PORTAL_MESSAGE {
-          out <- sending
+        if msg.Channel == sl.channel {
+          sending := sl.triggerMessages(msg)
+          if sending.Kind == PORTAL_MESSAGE {
+            out <- sending
+          }
         }
       case msg := <-in:
         sl.listenToMessages(msg)
