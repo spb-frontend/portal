@@ -38,7 +38,7 @@ func (g gitterService) triggerMessages(out chan PortalMessage, outGitter chan go
   for m := range outGitter {
     _, ok := g.sent[m.Id]
     if !ok {
-      message := PortalMessage{m.Text, m.FromUser.DisplayName, g.serviceName, PORTAL_MESSAGE}
+      message := PortalMessage{m.Text, m.FromUser.Username, g.serviceName, PORTAL_MESSAGE}
       out <- message
     }
   }
