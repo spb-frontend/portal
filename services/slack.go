@@ -30,11 +30,9 @@ func (sl slackService) ExposePortal() Portal {
     for {
       select {
       case msg := <-sl.rtm.IncomingEvents:
-        if msg.Channel == sl.channel {
-          sending := sl.triggerMessages(msg)
-          if sending.Kind == PORTAL_MESSAGE {
-            out <- sending
-          }
+        sending := sl.triggerMessages(msg, sl.channel)
+        if sending.Kind == PORTAL_MESSAGE {
+          out <- sending
         }
       case msg := <-in:
         sl.listenToMessages(msg)
@@ -56,11 +54,11 @@ func (sl slackService) listenToMessages(msg PortalMessage) {
   }
 }
 
-func (sl slackService) triggerMessages(msg slack.RTMEvent) PortalMessage {
+func (sl slackService) triggerMessages(msg slack.RTMEvent, channel string) PortalMessage {
   switch ev := msg.Data.(type) {
   case *slack.MessageEvent:
     _, hasMessage := sl.sent[ev.Timestamp]
-    if !hasMessage {
+    if channel == ev.Channel && !hasMessage {
       user, ok := sl.userCache[ev.User]
       if !ok {
         info, err := sl.api.GetUserInfo(ev.User)
