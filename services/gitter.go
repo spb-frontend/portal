@@ -21,25 +21,29 @@ func (g gitterService) ExposePortal() Portal {
   inGitter := gogitter.GetSendMessageStream(g.token, g.roomId)
   in := make(chan PortalMessage)
   out := make(chan PortalMessage)
-  go g.listenToMessages(in, inGitter)
-  go g.triggerMessages(out, outGitter)
+  go func() {
+    for {
+      select {
+      case m := <- in:
+        g.sendMessage(inGitter, m)
+      case m := <-outGitter:
+        g.emitMessage(m, out)
+      }
+    }
+  }()
   return Portal{in, out}
 }
 
-func (g gitterService) listenToMessages(in chan PortalMessage, inGitter chan string) {
-  for m := range in {
-    inGitter <- "**[" + m.Author + "]** " + m.Data
-    id := <- inGitter
-    g.sent[id] = true
-  }
+func (g gitterService) sendMessage(inGitter chan string, m PortalMessage) {
+  inGitter <- "**[" + m.Author + "]** " + m.Data
+  id := <- inGitter
+  g.sent[id] = true
 }
 
-func (g gitterService) triggerMessages(out chan PortalMessage, outGitter chan gogitter.GitterMessage) {
-  for m := range outGitter {
-    _, ok := g.sent[m.Id]
-    if !ok {
-      message := PortalMessage{m.Text, m.FromUser.Username, g.serviceName, PORTAL_MESSAGE}
-      out <- message
-    }
+func (g gitterService) emitMessage(m gogitter.GitterMessage, out chan PortalMessage) {
+  _, ok := g.sent[m.Id]
+  if !ok {
+    message := PortalMessage{m.Text, m.FromUser.Username, g.serviceName, PORTAL_MESSAGE}
+    out <- message
   }
 }
