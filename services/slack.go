@@ -8,6 +8,7 @@ import (
 type slackService struct {
   token string
   channel string
+  channelId string
   serviceName string
   api *slack.Client
   rtm *slack.RTM
@@ -15,12 +16,12 @@ type slackService struct {
   sent map[string]bool
 }
 
-func NewSlack(token, channel string) slackService {
+func NewSlack(token, channel, channelId string) slackService {
   api := slack.New(token)
   rtm := api.NewRTM()
   go rtm.ManageConnection()
   cache := make(map[string]*slack.User)
-  return slackService{token, channel, "slack", api, rtm, cache, make(map[string]bool)}
+  return slackService{token, channel, channelId, "slack", api, rtm, cache, make(map[string]bool)}
 }
 
 func (sl slackService) ExposePortal() Portal {
@@ -30,7 +31,7 @@ func (sl slackService) ExposePortal() Portal {
     for {
       select {
       case msg := <-sl.rtm.IncomingEvents:
-        sending := sl.triggerMessages(msg, sl.channel)
+        sending := sl.triggerMessages(msg, sl.channelId)
         if sending.Kind == PORTAL_MESSAGE {
           out <- sending
         }

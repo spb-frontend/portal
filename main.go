@@ -15,6 +15,7 @@ type GitterConf struct {
 type SlackConf struct {
   Channel string
   Token string
+  ChannelId string
 }
 
 type Configuration struct {
@@ -31,7 +32,7 @@ func main() {
     fmt.Println("error:", err)
   }
   gitter := services.NewGitter(conf.Gitter.Token, conf.Gitter.Room)
-  slack := services.NewSlack(conf.Slack.Token, conf.Slack.Channel)
+  slack := services.NewSlack(conf.Slack.Token, conf.Slack.Channel, conf.Slack.ChannelId)
   slackp := slack.ExposePortal()
   gitterp := gitter.ExposePortal()
 
