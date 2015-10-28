@@ -5,6 +5,7 @@
   },
   "slack": {
     "token": "TOKEN",
-    "channel": "CHANNEL"
+    "channel": "CHANNEL",
+    "channelId": "SLACK_CHANNEL_ID"
   }
 }
