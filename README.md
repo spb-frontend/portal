@@ -8,7 +8,7 @@ For now only available Gitter with Slack sync.
 Place file ```config.json``` within executable's directory.
 
 Example configuration:
-```
+```json
 {
   "gitter": {
     "token": "TOKEN",
